@@ -25,79 +25,82 @@ export default class App extends Component<Props, State> {
     isActive: '',
   };
 
-  _isActive = (button: string) => {
-    this.setState({isActive: button});
+  // _isActive = (button: string) => {
+  //   this.setState({isActive: button});
+  // };
+
+  _buttonScaleUp = (button: string) => {
+    let {scaleValue, isActive} = this.state;
+    console.log('!!!!!', button);
+    if (isActive !== button) {
+      console.log('pressed', button);
+      this.setState({isActive: button}, () => {
+        Animated.spring(scaleValue, {
+          toValue: 2,
+          friction: 30,
+          stretch: 100,
+          tension: 100,
+        }).start(() => {
+          this.setState({scaleValue: new Animated.Value(1)});
+        });
+      });
+    } else {
+      console.log('reset is active');
+      this.setState({isActive: ''});
+    }
   };
 
-  _buttonScaleUp = () => {
-    let {scaleValue} = this.state;
-    Animated.spring(scaleValue, {toValue: 2, friction: 3, tension: 40}).start();
-    console.log('pressed', this.state.isActive);
-  };
-  _buttonNotPressed = () => {
-    let {scaleValue} = this.state;
-    Animated.spring(scaleValue, {toValue: 1}).start();
-    console.log('notpressed', this.state.isActive);
-  };
   render() {
-    let {scaleValue, isActive} = this.state;
+    let {colorValue, scaleValue, isActive} = this.state;
+
     let scaleStyle = {
       transform: [{scale: scaleValue}],
     };
+
     return (
       <View style={styles.container}>
         <TouchableWithoutFeedback
-          onPressIn={() => {
-            this._isActive('pause');
-            this._buttonScaleUp();
-          }}
-          onPressOut={() => {
-            isActive !== 'pause' ? this._buttonNotPressed() : null;
+          onPress={() => {
+            this._buttonScaleUp('pause');
           }}
         >
           <Animated.View
             id="pause"
-            style={
-              isActive === 'pause' ? [styles.pause, scaleStyle] : styles.pause
-            }
+            style={isActive === 'pause' ? scaleStyle : null}
           >
-            <View style={styles.rectangle} />
-            <View style={styles.rectangle} />
+            <View style={styles.pause}>
+              <View style={styles.rectangle} />
+              <View style={styles.rectangle} />
+            </View>
           </Animated.View>
         </TouchableWithoutFeedback>
 
         <TouchableWithoutFeedback
           id="play"
-          onPressIn={() => {
-            this._isActive('play');
-            this._buttonScaleUp();
-          }}
-          onPressOut={() => {
-            isActive !== 'play' ? this._buttonNotPressed() : null;
+          onPress={() => {
+            this._buttonScaleUp('play');
           }}
         >
-          <Animated.View
-            style={
-              isActive === 'play' ? [styles.play, scaleStyle] : styles.play
-            }
-          />
+          <Animated.View style={isActive === 'play' ? scaleStyle : null}>
+            <Animated.View
+              style={
+                isActive === 'play'
+                  ? [styles.play, {borderLeftColor: 'blue'}]
+                  : styles.play
+              }
+            />
+          </Animated.View>
         </TouchableWithoutFeedback>
 
         <TouchableWithoutFeedback
           id="stop"
-          onPressIn={() => {
-            this._isActive('stop');
-            this._buttonScaleUp();
-          }}
-          onPressOut={() => {
-            isActive !== 'stop' ? this._buttonNotPressed() : null;
+          onPress={() => {
+            this._buttonScaleUp('stop');
           }}
         >
-          <Animated.View
-            style={
-              isActive === 'stop' ? [styles.stop, scaleStyle] : styles.stop
-            }
-          />
+          <Animated.View style={isActive === 'stop' ? scaleStyle : null}>
+            <View style={styles.stop} />
+          </Animated.View>
         </TouchableWithoutFeedback>
       </View>
     );
@@ -105,11 +108,6 @@ export default class App extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  iconContainer: {
-    height: 60,
-    width: 60,
-    backgroundColor: 'gray',
-  },
   container: {
     flex: 1,
     flexDirection: 'row',
